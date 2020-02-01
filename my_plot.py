@@ -9,6 +9,15 @@ def my_plotter(ax, data1, data2, para):
     return out
 
 
+def plot_angle(ax, x, y, angle, style):
+    phi = np.radians(angle)
+    xx = [x + .5, x, x + .5 * np.cos(phi)]
+    yy = [y, y, y + .5 * np.sin(phi)]
+    ax.plot(xx, yy, lw=12, color='tab:blue', solid_joinstyle=style)
+    ax.plot(xx, yy, lw=1, color='black')
+    ax.plot(xx[1], yy[1], 'o', color='tab:red', markersize=3)
+
+
 def my_scatter(ax, data1, data2, para):
     out = ax.scatter(data1, data2, **para)
     return out
@@ -98,6 +107,19 @@ def create_waffle_chart(dataset, categories, values, height, width, colormap, va
 
 
 if __name__ == "__main__":
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.set_title("Joint")
+    for x, style in enumerate(['miter', 'round', 'bevel']):
+        ax.text(x, 5, style)
+        for y, angle in enumerate([20, 45, 60, 90, 120]):
+            print(x, y, angle)
+            plot_angle(ax, x, y, angle, style)
+            if x == 0:
+                ax.text(-1.4, y, "{} degree".format(angle))
+    ax.set_xlim(-1.5, 2.75)
+    ax.set_ylim(-0.5, 5.5)
+    ax.xaxis.set_visible(False)
+    ax.yaxis.set_visible(False)
     # f = "/home/murphy/stats/diabetes.csv"
     # df = pd.read_csv(f, sep=',')
     # y = ["sugar"]
@@ -112,14 +134,16 @@ if __name__ == "__main__":
     #         my_scatter(ax[j], df.loc[:, x[j]], df.loc[:, y[0]], {})
     # else:
     #     pass
-    data = {'a': np.arange(50),
-            'c': np.random.randint(0, 50, 50),
-            'd': np.random.randn(50)}
-    data['b'] = data['a'] + 10 * np.random.randn(50)
-    data['d'] = np.abs(data['d']) * 100
-    fig, ax = plt.subplots(1, 1, figsize=(12, 12))
-    my_scatter(ax=ax, data1=data['a'], data2=data['b'], para={"s": data['d'], "c": data['c']})
-    plt.text(10, 40, "Test")
+
+    # data = {'a': np.arange(50),
+    #         'c': np.random.randint(0, 50, 50),
+    #         'd': np.random.randn(50)}
+    # data['b'] = data['a'] + 10 * np.random.randn(50)
+    # data['d'] = np.abs(data['d']) * 100
+    # fig, ax = plt.subplots(1, 1, figsize=(12, 12))
+    # my_scatter(ax=ax, data1=data['a'], data2=data['b'], para={"s": data['d'], "c": data['c']})
+    # plt.text(10, 40, "Test")
+
     # my_plotter(ax[0], data1, data2, {"marker": 'x', 'color': 'red'})
     # my_plotter(ax[0], data3, data4, {"marker": "+"})
     # ax[0].set_title("Plot1", fontsize=18)
