@@ -107,6 +107,11 @@ def create_waffle_chart(dataset, categories, values, height, width, colormap, va
 
 
 def stacked_plot(data):
+    """
+    条形堆积图，输入pandas dataframe
+    :param data: pandas dataframe
+    :return:
+    """
     df = data
     columns = df.columns
     rows = ['%d case' % x for x in df.index]
@@ -138,6 +143,56 @@ def stacked_plot(data):
     plt.savefig("/home/murphy/django/static/images/stat.png")
 
 
+def adjacent_values(vals, q1, q3):
+    upper_adjacent_value = q3 + (q3 - q1) * 1.5
+    upper_adjacent_value = np.clip(upper_adjacent_value, q3, vals[-1])
+
+    lower_adjacent_value = q1 - (q3 - q1) * 1.5
+    lower_adjacent_value = np.clip(lower_adjacent_value, vals[0], q1)
+    return lower_adjacent_value, upper_adjacent_value
+
+
+def set_axis_style(ax, labels):
+    ax.get_xaxis().set_tick_params(direction='out')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.set_xticks(np.arange(1, len(labels) + 1))
+    ax.set_xticklabels(labels)
+    ax.set_xlim(0.25, len(labels) + 0.75)
+    ax.set_xlabel('Sample name')
+
+
+def violin_plot(data):
+    fig, ax = plt.subplots(nrows=1, ncols=1)
+
+    ax.set_title('Customized violin plot')
+    parts = ax.violinplot(
+        data, showmeans=False, showmedians=False,
+        showextrema=False)
+
+    for pc in parts['bodies']:
+        pc.set_facecolor('#D43F3A')
+        pc.set_edgecolor('black')
+        pc.set_alpha(1)
+
+    quartile1, medians, quartile3 = np.percentile(data, [25, 50, 75], axis=1)
+    whiskers = np.array([
+        adjacent_values(sorted_array, q1, q3)
+        for sorted_array, q1, q3 in zip(data, quartile1, quartile3)])
+    whiskersMin, whiskersMax = whiskers[:, 0], whiskers[:, 1]
+
+    inds = np.arange(1, len(medians) + 1)
+    ax.scatter(inds, medians, marker='o', color='white', s=30, zorder=3)
+    ax.vlines(inds, quartile1, quartile3, color='k', linestyle='-', lw=5)
+    ax.vlines(inds, whiskersMin, whiskersMax, color='k', linestyle='-', lw=1)
+
+    # set style for the axes
+    # labels = ['A', 'B', 'C', 'D']
+    # set_axis_style(ax, labels)
+
+    plt.subplots_adjust(bottom=0.15, wspace=0.05)
+    plt.savefig("/home/murphy/django/static/images/stat.png")
+
+
 if __name__ == "__main__":
     # fig, ax = plt.subplots(2, 1)
     # t = np.arange(0.0, 1.0+0.01, 0.01)
@@ -162,6 +217,9 @@ if __name__ == "__main__":
     f = "/home/murphy/stats/diabetes.csv"
     df = pd.read_csv(f, sep=',')
     stacked_plot(data=df)
+    np.random.seed(19680801)
+    data = [sorted(np.random.normal(0, std, 100)) for std in range(1, 9)]
+    violin_plot(data=data)
     # y = ["sugar"]
     # x = ["auxin", "insulin"]
     # fig, ax = plt.subplots(len(x), df.shape[1]-len(x), figsize=(14, 7))
