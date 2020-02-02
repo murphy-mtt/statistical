@@ -107,19 +107,26 @@ def create_waffle_chart(dataset, categories, values, height, width, colormap, va
 
 
 if __name__ == "__main__":
-    fig, ax = plt.subplots(figsize=(8, 6))
-    ax.set_title("Joint")
-    for x, style in enumerate(['miter', 'round', 'bevel']):
-        ax.text(x, 5, style)
-        for y, angle in enumerate([20, 45, 60, 90, 120]):
-            print(x, y, angle)
-            plot_angle(ax, x, y, angle, style)
-            if x == 0:
-                ax.text(-1.4, y, "{} degree".format(angle))
-    ax.set_xlim(-1.5, 2.75)
-    ax.set_ylim(-0.5, 5.5)
-    ax.xaxis.set_visible(False)
-    ax.yaxis.set_visible(False)
+    fig, ax = plt.subplots(2, 1)
+    t = np.arange(0.0, 1.0+0.01, 0.01)
+    s = np.cos(2 * 2*np.pi * t)
+    t[41:60] = np.nan
+    my_plotter(ax[0], t, s, {'lw': 2, 'marker': 'o'})
+    plt.xlabel('time(s)')
+    plt.ylabel('voltage(V)')
+    plt.title('A sine wave with a gap of NaNs between 0.4 and 0.6')
+    plt.grid(True)
+
+    t[0] = np.nan
+    t[-1] = np.nan
+    my_plotter(ax[1], t, s, {"marker": "o", 'lw': 2})
+    plt.title('Also with NaN in first and last point')
+    plt.xlabel('time(s)')
+    plt.ylabel('voltage(V)')
+    plt.title('Another')
+    plt.grid(True)
+
+    plt.tight_layout()
     # f = "/home/murphy/stats/diabetes.csv"
     # df = pd.read_csv(f, sep=',')
     # y = ["sugar"]
@@ -134,23 +141,4 @@ if __name__ == "__main__":
     #         my_scatter(ax[j], df.loc[:, x[j]], df.loc[:, y[0]], {})
     # else:
     #     pass
-
-    # data = {'a': np.arange(50),
-    #         'c': np.random.randint(0, 50, 50),
-    #         'd': np.random.randn(50)}
-    # data['b'] = data['a'] + 10 * np.random.randn(50)
-    # data['d'] = np.abs(data['d']) * 100
-    # fig, ax = plt.subplots(1, 1, figsize=(12, 12))
-    # my_scatter(ax=ax, data1=data['a'], data2=data['b'], para={"s": data['d'], "c": data['c']})
-    # plt.text(10, 40, "Test")
-
-    # my_plotter(ax[0], data1, data2, {"marker": 'x', 'color': 'red'})
-    # my_plotter(ax[0], data3, data4, {"marker": "+"})
-    # ax[0].set_title("Plot1", fontsize=18)
-    # ax[0].set_xlabel('xlabel', fontsize=18, fontfamily='sans-serif', fontstyle='italic')
-    # ax[0].set_ylabel('ylabel', fontsize='x-large', fontstyle='oblique')
-    # ax[0].minorticks_on()
-    # ax[0].grid(which='minor', axis='both')
-    # ax[0].legend(('plot1', 'plot2'))
-    # my_plotter(ax[1], data1, data3, {"marker": "o"})
     plt.savefig("/home/murphy/django/static/images/stat.png")
