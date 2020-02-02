@@ -106,29 +106,62 @@ def create_waffle_chart(dataset, categories, values, height, width, colormap, va
     )
 
 
+def stacked_plot(data):
+    df = data
+    columns = df.columns
+    rows = ['%d case' % x for x in df.index]
+
+    colors = plt.cm.BuPu(np.linspace(0, 0.5, len(rows)))
+    n_rows = len(df)
+    index = np.arange(len(columns)) + 0.3
+    bar_width = 0.4
+    y_offset = np.zeros(len(columns))
+    cell_text = []
+
+    for row in range(n_rows):
+        plt.bar(index, df.iloc[row, :], bar_width, bottom=y_offset, color=colors[row])
+        y_offset = y_offset + df.iloc[row, :]
+        cell_text.append(['%1.1f' % x for x in y_offset])
+    colors = colors[::-1]
+    cell_text.reverse()
+
+    the_table = plt.table(
+        cellText=cell_text,
+        rowLabels=rows,
+        rowColours=colors,
+        colLabels=columns,
+        loc='bottom'
+    )
+    plt.subplots_adjust(left=0.2, bottom=0.2)
+    plt.ylabel("Y amount")
+    plt.xticks([])
+    plt.savefig("/home/murphy/django/static/images/stat.png")
+
+
 if __name__ == "__main__":
-    fig, ax = plt.subplots(2, 1)
-    t = np.arange(0.0, 1.0+0.01, 0.01)
-    s = np.cos(2 * 2*np.pi * t)
-    t[41:60] = np.nan
-    my_plotter(ax[0], t, s, {'lw': 2, 'marker': 'o'})
-    plt.xlabel('time(s)')
-    plt.ylabel('voltage(V)')
-    plt.title('A sine wave with a gap of NaNs between 0.4 and 0.6')
-    plt.grid(True)
-
-    t[0] = np.nan
-    t[-1] = np.nan
-    my_plotter(ax[1], t, s, {"marker": "o", 'lw': 2})
-    plt.title('Also with NaN in first and last point')
-    plt.xlabel('time(s)')
-    plt.ylabel('voltage(V)')
-    plt.title('Another')
-    plt.grid(True)
-
-    plt.tight_layout()
-    # f = "/home/murphy/stats/diabetes.csv"
-    # df = pd.read_csv(f, sep=',')
+    # fig, ax = plt.subplots(2, 1)
+    # t = np.arange(0.0, 1.0+0.01, 0.01)
+    # s = np.cos(2 * 2*np.pi * t)
+    # t[41:60] = np.nan
+    # my_plotter(ax[0], t, s, {'lw': 2, 'marker': 'o'})
+    # plt.xlabel('time(s)')
+    # plt.ylabel('voltage(V)')
+    # plt.title('A sine wave with a gap of NaNs between 0.4 and 0.6')
+    # plt.grid(True)
+    #
+    # t[0] = np.nan
+    # t[-1] = np.nan
+    # my_plotter(ax[1], t, s, {"marker": "o", 'lw': 2})
+    # plt.title('Also with NaN in first and last point')
+    # plt.xlabel('time(s)')
+    # plt.ylabel('voltage(V)')
+    # plt.title('Another')
+    # plt.grid(True)
+    #
+    # plt.tight_layout()
+    f = "/home/murphy/stats/diabetes.csv"
+    df = pd.read_csv(f, sep=',')
+    stacked_plot(data=df)
     # y = ["sugar"]
     # x = ["auxin", "insulin"]
     # fig, ax = plt.subplots(len(x), df.shape[1]-len(x), figsize=(14, 7))
@@ -141,4 +174,4 @@ if __name__ == "__main__":
     #         my_scatter(ax[j], df.loc[:, x[j]], df.loc[:, y[0]], {})
     # else:
     #     pass
-    plt.savefig("/home/murphy/django/static/images/stat.png")
+    # plt.savefig("/home/murphy/django/static/images/stat.png")
