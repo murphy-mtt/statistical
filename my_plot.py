@@ -193,7 +193,62 @@ def violin_plot(data):
     plt.savefig("/home/murphy/django/static/images/stat.png")
 
 
+def stacked_bar_chart(ax, data):
+    p1 = ax.bar(ind, df1.loc[:, 'M_mean'], width, yerr=df1.loc[:, 'M_std'])
+    p2 = ax.bar(ind, df1.loc[:, 'F_mean'], width, bottom=df1.loc[:, 'M_mean'], yerr=df1.loc[:, 'F_std'])
+
+
+def grouped_bar_chart(ax, data):
+    pass
+
+
+def auto_label(rects):
+    for rect in rects:
+        height = rect.get_height()
+        ax.annotate(
+            "{}".format(height),
+            xy=(rect.get_x() + rect.get_width()/2, height),
+            xytext=(0, 3),
+            textcoords="offset points",
+            ha='center',
+            va='bottom'
+        )
+
+
 if __name__ == "__main__":
+    fig, ax = plt.subplots(1, 1)
+    sf = "/home/murphy/stats/statistical/school.txt"
+    df = pd.read_csv(sf, sep=',')
+    d = {}
+    for sch in range(len(df)):
+        name = df.iloc[sch, 0]
+        d[name] = {
+            'M': [np.random.randint(40, 80, np.random.randint(40, 50, 1))],
+            'F': [np.random.randint(40, 70, np.random.randint(40, 50, 1))]
+        }
+
+    for k, v in d.items():
+        d[k]['M_mean'] = np.int(np.mean(d[k]['M']))
+        d[k]['F_mean'] = np.int(np.mean(d[k]['F']))
+        d[k]['M_std'] = np.int(np.std(d[k]['M']))
+        d[k]['F_std'] = np.int(np.std(d[k]['F']))
+    df = pd.DataFrame(d)
+    df = df.T
+    df1 = df.loc[:, ['F_mean', 'F_std', 'M_mean', 'M_std']]
+    N = len(df1)
+    ind = np.arange(N)
+    width = 0.35
+    rects1 = ax.bar(ind-width/2, df1.loc[:, 'M_mean'], width, label='Male')
+    rects2 = ax.bar(ind+width/2, df1.loc[:, 'F_mean'], width, label='Female')
+    # stacked_bar_chart(ax, df1)
+    plt.ylabel("Score")
+    plt.xlabel("School")
+    plt.xticks(ind, df1.index, rotation=-30)
+    plt.title("Bar Plot Example")
+    auto_label(rects1)
+    auto_label(rects2)
+    plt.legend()
+
     # fig, ax = plt.subplots(2, 1)
     # t = np.arange(0.0, 1.0+0.01, 0.01)
     # s = np.cos(2 * 2*np.pi * t)
@@ -212,14 +267,15 @@ if __name__ == "__main__":
     # plt.ylabel('voltage(V)')
     # plt.title('Another')
     # plt.grid(True)
-    #
     # plt.tight_layout()
-    f = "/home/murphy/stats/diabetes.csv"
-    df = pd.read_csv(f, sep=',')
-    stacked_plot(data=df)
-    np.random.seed(19680801)
-    data = [sorted(np.random.normal(0, std, 100)) for std in range(1, 9)]
-    violin_plot(data=data)
+
+    # f = "/home/murphy/stats/diabetes.csv"
+    # df = pd.read_csv(f, sep=',')
+    # stacked_plot(data=df)
+    # np.random.seed(19680801)
+    # data = [sorted(np.random.normal(0, std, 100)) for std in range(1, 9)]
+    # violin_plot(data=data)
+
     # y = ["sugar"]
     # x = ["auxin", "insulin"]
     # fig, ax = plt.subplots(len(x), df.shape[1]-len(x), figsize=(14, 7))
@@ -232,4 +288,4 @@ if __name__ == "__main__":
     #         my_scatter(ax[j], df.loc[:, x[j]], df.loc[:, y[0]], {})
     # else:
     #     pass
-    # plt.savefig("/home/murphy/django/static/images/stat.png")
+    plt.savefig("/home/murphy/django/static/images/stat.png")
