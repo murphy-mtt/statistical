@@ -216,38 +216,43 @@ def auto_label(rects):
 
 
 if __name__ == "__main__":
-    fig, ax = plt.subplots(1, 1)
-    sf = "/home/murphy/stats/statistical/school.txt"
-    df = pd.read_csv(sf, sep=',')
-    d = {}
-    for sch in range(len(df)):
-        name = df.iloc[sch, 0]
-        d[name] = {
-            'M': [np.random.randint(40, 80, np.random.randint(40, 50, 1))],
-            'F': [np.random.randint(40, 70, np.random.randint(40, 50, 1))]
-        }
-
-    for k, v in d.items():
-        d[k]['M_mean'] = np.int(np.mean(d[k]['M']))
-        d[k]['F_mean'] = np.int(np.mean(d[k]['F']))
-        d[k]['M_std'] = np.int(np.std(d[k]['M']))
-        d[k]['F_std'] = np.int(np.std(d[k]['F']))
-    df = pd.DataFrame(d)
-    df = df.T
-    df1 = df.loc[:, ['F_mean', 'F_std', 'M_mean', 'M_std']]
-    N = len(df1)
-    ind = np.arange(N)
-    width = 0.35
-    rects1 = ax.bar(ind-width/2, df1.loc[:, 'M_mean'], width, label='Male')
-    rects2 = ax.bar(ind+width/2, df1.loc[:, 'F_mean'], width, label='Female')
-    # stacked_bar_chart(ax, df1)
-    plt.ylabel("Score")
-    plt.xlabel("School")
-    plt.xticks(ind, df1.index, rotation=-30)
-    plt.title("Bar Plot Example")
-    auto_label(rects1)
-    auto_label(rects2)
-    plt.legend()
+    fig, ax = plt.subplots(2, 1, sharex=True)
+    t = np.arange(0.0, 2.0, 0.01)
+    s1 = np.sin(2*np.pi*t)
+    s2 = np.sin(4*np.pi*t)
+    my_plotter(ax[0], t, s1, {})
+    my_plotter(ax[1], t, s2, {'marker': 's'})
+    # sf = "/home/murphy/stats/statistical/school.txt"
+    # df = pd.read_csv(sf, sep=',')
+    # d = {}
+    # for sch in range(len(df)):
+    #     name = df.iloc[sch, 0]
+    #     d[name] = {
+    #         'M': [np.random.randint(40, 80, np.random.randint(40, 50, 1))],
+    #         'F': [np.random.randint(40, 70, np.random.randint(40, 50, 1))]
+    #     }
+    #
+    # for k, v in d.items():
+    #     d[k]['M_mean'] = np.int(np.mean(d[k]['M']))
+    #     d[k]['F_mean'] = np.int(np.mean(d[k]['F']))
+    #     d[k]['M_std'] = np.int(np.std(d[k]['M']))
+    #     d[k]['F_std'] = np.int(np.std(d[k]['F']))
+    # df = pd.DataFrame(d)
+    # df = df.T
+    # df1 = df.loc[:, ['F_mean', 'F_std', 'M_mean', 'M_std']]
+    # N = len(df1)
+    # ind = np.arange(N)
+    # width = 0.35
+    # rects1 = ax.bar(ind-width/2, df1.loc[:, 'M_mean'], width, label='Male')
+    # rects2 = ax.bar(ind+width/2, df1.loc[:, 'F_mean'], width, label='Female')
+    # # stacked_bar_chart(ax, df1)
+    # plt.ylabel("Score")
+    # plt.xlabel("School")
+    # plt.xticks(ind, df1.index, rotation=-30)
+    # plt.title("Bar Plot Example")
+    # auto_label(rects1)
+    # auto_label(rects2)
+    # plt.legend()
 
     # fig, ax = plt.subplots(2, 1)
     # t = np.arange(0.0, 1.0+0.01, 0.01)
@@ -262,12 +267,12 @@ if __name__ == "__main__":
     # t[0] = np.nan
     # t[-1] = np.nan
     # my_plotter(ax[1], t, s, {"marker": "o", 'lw': 2})
-    # plt.title('Also with NaN in first and last point')
-    # plt.xlabel('time(s)')
-    # plt.ylabel('voltage(V)')
-    # plt.title('Another')
+    plt.title('Also with NaN in first and last point')
+    plt.xlabel('time(s)')
+    plt.ylabel('voltage(V)')
+    plt.title('Another')
     # plt.grid(True)
-    # plt.tight_layout()
+    plt.tight_layout()
 
     # f = "/home/murphy/stats/diabetes.csv"
     # df = pd.read_csv(f, sep=',')
