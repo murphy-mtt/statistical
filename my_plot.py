@@ -215,15 +215,31 @@ def auto_label(rects):
         )
 
 
+def hist(ax, data, para):
+    return ax.hist(data, **para)
+
+
+def hist2d(ax, data1, data2, para):
+    return ax.hist2d(data1, data2, **para)
+
+
 if __name__ == "__main__":
-    fig, ax = plt.subplots(3, 1, sharex=True)
-    t = np.arange(0.0, 2.0, 0.01)
-    s1 = np.sin(2*np.pi*t)
-    s2 = np.sin(4*np.pi*t)
-    s3 = np.exp(-t)
-    my_plotter(ax[0], t, s1, {})
-    my_plotter(ax[1], t, s2, {})
-    my_plotter(ax[2], t, s3, {})
+    fig, ax = plt.subplots(1, 1)
+    mu, sigma = 100, 15
+    mu2, sigma2 = 130, 20
+    x = mu + sigma * np.random.randn(10000)
+    x1 = mu2 + sigma2 * np.random.randn(10000)
+    hist2d(ax, x, x1, {
+        'bins': 100,
+        'facecolor': 'g',
+    })
+    # t = np.arange(0.0, 2.0, 0.01)
+    # s1 = np.sin(2*np.pi*t)
+    # s2 = np.sin(4*np.pi*t)
+    # s3 = np.exp(-t)
+    # my_plotter(ax[0], t, s1, {})
+    # my_plotter(ax[1], t, s2, {})
+    # my_plotter(ax[2], t, s3, {})
     # sf = "/home/murphy/stats/statistical/school.txt"
     # df = pd.read_csv(sf, sep=',')
     # d = {}
@@ -269,15 +285,15 @@ if __name__ == "__main__":
     # t[0] = np.nan
     # t[-1] = np.nan
     # my_plotter(ax[1], t, s, {"marker": "o", 'lw': 2})
-    plt.title('Also with NaN in first and last point')
-    plt.xlabel('time(s)')
-    plt.ylabel('voltage(V)')
-    plt.title('Another')
-    ax[1].set_title("test")
-    plt.setp(ax[2].get_xticklabels(), fontsize=6)
-    plt.setp(ax[1].get_xticklabels(), visible=False)
-    # plt.grid(True)
-    plt.tight_layout()
+    # plt.title('Also with NaN in first and last point')
+    # plt.xlabel('time(s)')
+    # plt.ylabel('voltage(V)')
+    # plt.title('Another')
+    # ax[1].set_title("test")
+    # plt.setp(ax[2].get_xticklabels(), fontsize=6)
+    # plt.setp(ax[1].get_xticklabels(), visible=False)
+    # # plt.grid(True)
+    # plt.tight_layout()
 
     # f = "/home/murphy/stats/diabetes.csv"
     # df = pd.read_csv(f, sep=',')
