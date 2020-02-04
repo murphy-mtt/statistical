@@ -216,12 +216,14 @@ def auto_label(rects):
 
 
 if __name__ == "__main__":
-    fig, ax = plt.subplots(2, 1, sharex=True)
+    fig, ax = plt.subplots(3, 1, sharex=True)
     t = np.arange(0.0, 2.0, 0.01)
     s1 = np.sin(2*np.pi*t)
     s2 = np.sin(4*np.pi*t)
+    s3 = np.exp(-t)
     my_plotter(ax[0], t, s1, {})
-    my_plotter(ax[1], t, s2, {'marker': 's'})
+    my_plotter(ax[1], t, s2, {})
+    my_plotter(ax[2], t, s3, {})
     # sf = "/home/murphy/stats/statistical/school.txt"
     # df = pd.read_csv(sf, sep=',')
     # d = {}
@@ -271,6 +273,9 @@ if __name__ == "__main__":
     plt.xlabel('time(s)')
     plt.ylabel('voltage(V)')
     plt.title('Another')
+    ax[1].set_title("test")
+    plt.setp(ax[2].get_xticklabels(), fontsize=6)
+    plt.setp(ax[1].get_xticklabels(), visible=False)
     # plt.grid(True)
     plt.tight_layout()
 
