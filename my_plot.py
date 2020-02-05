@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches  # needed for waffle Charts
+import mpl_toolkits.axisartist as axisartist
 
 
 def my_plotter(ax, data1, data2, para):
@@ -223,8 +224,27 @@ def hist2d(ax, data1, data2, para):
     return ax.hist2d(data1, data2, **para)
 
 
+def setup_axes(fig, rect):
+    ax = axisartist.Subplot(fig, rect)
+    fig.add_axes(ax)
+
+    ax.set_ylim(-0.1, 1.5)
+    ax.set_yticks([0, 1])
+
+    ax.axis[:].set_visible(False)
+
+    ax.axis["x"] = ax.new_floating_axis(1, 0.5)
+    ax.axis["x"].set_axisline_style("->", size=1.5)
+
+    return ax
+
+
 if __name__ == "__main__":
-    fig, ax = plt.subplots(1, 1)
+    fig = plt.figure(figsize=(3, 2.5))
+    fig.subplots_adjust(top=0.8)
+    ax1 = setup_axes(fig, "111")
+
+    ax1.axis["x"].set_axis_direction("left")
     # mu, sigma = 100, 15
     # mu2, sigma2 = 130, 20
     # x = mu + sigma * np.random.randn(10000)
