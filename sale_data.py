@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+plt.rcParams['font.sans-serif'] = ['SimHei']
+
 
 class Chandler:
     def __init__(self, file_list, period='month', region=["华东"]):
@@ -68,10 +70,23 @@ class Chandler:
         df_filled = df_tmp.pivot_table(df_tmp, index=['period'], columns=['地区']).fillna(value=0.0)
         return df_filled
 
+    def client_analysis(self):
+        pass
+
     def stack_plot(self):
         df = self.date_analysis()
         fig, ax = plt.subplots()
-        return None
+        x = np.arange(len(df.index))
+        y = []
+        for i in range(len(df.columns)):
+            y.append(df.iloc[:, i])
+        xticks = range(0, len(df.index), 1)
+        ax.set_xticks(xticks)
+        ax.stackplot(x, y, labels=df.columns)
+        ax.set_xticklabels(df.index.strftime(date_format='%Y-%m'), rotation=45)
+        plt.title("{}区域销量（{}）".format(''.join(self.region), self.period))
+        plt.legend(loc='upper left')
+        plt.savefig("/home/murphy/django/static/images/stat.png")
 
     def my_plotter(ax, data1, data2, para):
         out = ax.plot(data1, data2, **para)
@@ -91,5 +106,5 @@ if __name__ == "__main__":
     d = "/home/murphy/stats/tables"
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
-    monica = Chandler(file_list=files)
+    monica = Chandler(file_list=files, period='quarter')
     df = monica.stack_plot()
