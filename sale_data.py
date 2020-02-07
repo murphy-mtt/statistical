@@ -15,7 +15,7 @@ class Chandler:
         :param region: On which region the analysis base on, default East of China
         """
         self.files = file_list
-        self.column = ['癌种', '送检医生', '医院', '大区', '大区经理', '地区经理', '地区', '订单类型', '订单价格', '样本方式', '产品名称', '受检者', '创建订单时间', '送检单号', '销售姓名']
+        self.column = ['癌种', '送检医生', '医院', '大区', '大区经理', '地区经理', '地区', '订单类型', '订单价格', '样本方式', '产品名称', '受检者', '创建订单时间', '送检单号', '销售姓名', '科室']
         self.period = period
         self.region = region
 
@@ -73,21 +73,30 @@ class Chandler:
         df_filled = df_tmp.pivot_table(df_tmp, index=['period'], columns=['地区']).fillna(value=0.0)
         return df_filled
 
-    def client_analysis(self):
-        pass
-
-    def stack_plot(self, type):
-        if type not in ['date', 'cancer']:
-            raise ValueError("Choose from ")
-        if type == "date":
-            df = self.date_analysis()
-            xtickslabel = df.index.strftime(date_format='%Y-%m')
-        elif type == "cancer":
-            df = self.cancer_type_analysis()
-            xtickslabel = df.index
+    def client_analysis(self, client_type):
+        client_type_list = ['doctor', 'hospital', 'department']
+        if client_type not in client_type_list:
+            raise ValueError("Choose from %s" % "/".join(client_type_list))
+        df_tmp = self.region_analysis(region=self.region)
+        df_tmp.送检医生.fillna(value='unknown', inplace=True)
+        df_tmp.科室.fillna(value='unknown', inplace=True)
+        df_tmp.医院.fillna(value='unknown', inplace=True)
+        if client_type == "department":
+            df_filled = df_tmp.pivot_table(df_tmp, index=["科室"], columns=["地区"]).fillna(value=0.0)
+        elif client_type == "hospital":
+            df_filled = df_tmp.pivot_table(df_tmp, index=["医院"], columns=["地区"]).fillna(value=0.0)
         else:
-            df = self.date_analysis()
+            df_filled = df_tmp.pivot_table(df_tmp, index=["送检医生"], columns=["地区"]).fillna(value=0.0)
+        return df_filled
+
+    def stack_plot(self, type, df):
+        data_list = ['date', 'cancer', 'department']
+        if type not in data_list:
+            raise ValueError("Choose from %s" % ("/".join(data_list)))
+        if type == "date":
             xtickslabel = df.index.strftime(date_format='%Y-%m')
+        else:
+            xtickslabel = df.index
         fig, ax = plt.subplots()
         x = np.arange(len(df.index))
         y = []
@@ -120,4 +129,7 @@ if __name__ == "__main__":
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
     monica = Chandler(file_list=files, period='quarter')
-    df = monica.stack_plot(type='cancer')
+    df = monica.client_analysis(client_type='department')
+    print(df)
+    monica.stack_plot(type='date', df=df)
+    # print(monica.client_analysis(client_type='doctor'))
