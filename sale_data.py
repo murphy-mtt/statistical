@@ -45,7 +45,10 @@ class Chandler:
             df[i] = df[i].astype('category')
 
     def cancer_type_analysis(self):
-        pass
+        df_tmp = self.region_analysis(region=self.region)
+        df_tmp.癌种.fillna(value='unknown', inplace=True)
+        df_filled = df_tmp.pivot_table(df_tmp, index=['癌种'], columns=['地区']).fillna(value=0.0)
+        return df_filled
 
     def region_analysis(self, region):
         df = self.integration()
@@ -73,8 +76,18 @@ class Chandler:
     def client_analysis(self):
         pass
 
-    def stack_plot(self):
-        df = self.date_analysis()
+    def stack_plot(self, type):
+        if type not in ['date', 'cancer']:
+            raise ValueError("Choose from ")
+        if type == "date":
+            df = self.date_analysis()
+            xtickslabel = df.index.strftime(date_format='%Y-%m')
+        elif type == "cancer":
+            df = self.cancer_type_analysis()
+            xtickslabel = df.index
+        else:
+            df = self.date_analysis()
+            xtickslabel = df.index.strftime(date_format='%Y-%m')
         fig, ax = plt.subplots()
         x = np.arange(len(df.index))
         y = []
@@ -83,7 +96,7 @@ class Chandler:
         xticks = range(0, len(df.index), 1)
         ax.set_xticks(xticks)
         ax.stackplot(x, y, labels=df.columns)
-        ax.set_xticklabels(df.index.strftime(date_format='%Y-%m'), rotation=45)
+        ax.set_xticklabels(xtickslabel, rotation=45)
         plt.title("{}区域销量（{}）".format(''.join(self.region), self.period))
         plt.legend(loc='upper left')
         plt.savefig("/home/murphy/django/static/images/stat.png")
@@ -107,4 +120,4 @@ if __name__ == "__main__":
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
     monica = Chandler(file_list=files, period='quarter')
-    df = monica.stack_plot()
+    df = monica.stack_plot(type='cancer')
