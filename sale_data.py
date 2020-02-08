@@ -94,7 +94,7 @@ class Chandler:
             df_filled = df_tmp.pivot_table(df_tmp, index=["送检医生"], columns=["地区"]).fillna(value=0.0)
         return df_filled
 
-    def stack_plot(self, type, df, figure_type):
+    def stack_plot(self, type, df):
         data_list = ['date', 'cancer', 'department']
         if type not in data_list:
             raise ValueError("Choose from %s" % ("/".join(data_list)))
@@ -109,25 +109,57 @@ class Chandler:
             y.append(df.iloc[:, i])
         xticks = range(0, len(df.index), 1)
         ax.set_xticks(xticks)
-        # ax.stackplot(x, y, labels=df.columns)
-        # self.stackplot(ax, x, y, {"labels": df.columns})
-        self.__callback(figure_type, ax, x, y, {})
+        ax.stackplot(x, y, labels=df.columns)
         ax.set_xticklabels(xtickslabel, rotation=45)
         plt.title("{}区域销量（{}）".format(''.join(self.region), self.period))
         plt.legend(loc='upper left')
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
-    def grouped_bar(self, data_type, dataframe):
-        width = 0.35
-        for i in dataframe.index:
-            print(i)
-        return None
+    def grouped_bar(self, type, dataframe):
+        data_list = ['date', 'cancer', 'department']
+        if type not in data_list:
+            raise ValueError("Choose from %s" % ("/".join(data_list)))
+        if type == "date":
+            xtickslabel = df.index.strftime(date_format='%Y-%m')
+        else:
+            xtickslabel = df.index
+        fig, ax = plt.subplots()
+        xticker, width = self.group_bar_ticker(len(dataframe.columns), len(dataframe.index))
+        rects = []
+        for i in range(len(dataframe.index)):
+            rect = ax.bar(xticker[i], dataframe.iloc[i, :], width, label=xtickslabel[i])
+            rects.append(rect)
+        plt.savefig("/home/murphy/django/static/images/stat.png")
 
     def stackplot(self, ax, x, y, para):
         return ax.stackplot(x, y, **para)
 
     def plot(self, ax, x, y, para):
         return ax.plot(x, y, **para)
+
+    @staticmethod
+    def group_bar_ticker(cols, rows, gap=0.2):
+        width = (1 - gap)/cols
+        tickers = []
+        x = np.arange(rows)
+        for j in x:
+            tmp = []
+            for i in np.arange(cols):
+                t = x[j] - width * rows / 2 + width / 2 + i * width
+                tmp.append(t)
+            tickers.append(tmp)
+        return tickers, width
+
+    @staticmethod
+    def autolabel(rects):
+        """Attach a text label above each bar in *rects*, displaying its height."""
+        for rect in rects:
+            height = rect.get_height()
+            ax.annotate('{}'.format(height),
+                        xy=(rect.get_x() + rect.get_width() / 2, height),
+                        xytext=(0, 3),  # 3 points vertical offset
+                        textcoords="offset points",
+                        ha='center', va='bottom')
 
 
 class Picasso:
@@ -139,25 +171,11 @@ class Picasso:
         return ax.plot(x, y, **para)
 
 
-def xtick_loc(x, width, n):
-    r = []
-    for i in range(len(x)):
-        for j in range(n):
-            print(i, j)
-            r[i] = []
-    return r
-
-
 if __name__ == "__main__":
     d = "/home/murphy/stats/tables"
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
-    # monica = Chandler(file_list=files, period='quarter')
-    # df = monica.date_analysis()
-    # monica.stack_plot(type='date', df=df, figure_type="stackplot")
-
-    labels = ['G1', 'G2', 'G3', 'G4', 'G5']
-    men_means = [20, 34, 30, 35, 27]
-    women_means = [25, 32, 34, 20, 25]
-    x = np.arange(len(labels))
-    r = xtick_loc(x, 0.1, 6)
+    monica = Chandler(file_list=files, period='quarter')
+    df = monica.date_analysis()
+    # monica.stack_plot(type='date', df=df, figure_type="plot")
+    monica.grouped_bar(type='date', dataframe=df)
