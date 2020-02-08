@@ -125,10 +125,25 @@ class Chandler:
             xtickslabel = df.index
         fig, ax = plt.subplots()
         xticker, width = self.group_bar_ticker(len(dataframe.columns), len(dataframe.index))
-        rects = []
         for i in range(len(dataframe.index)):
-            rect = ax.bar(xticker[i], dataframe.iloc[i, :], width, label=xtickslabel[i])
-            rects.append(rect)
+            rect = ax.bar(xticker[i], dataframe.iloc[i, :], width, label=dataframe.index[i])
+            self.autolabel(ax, rect)
+        xticks = range(0, len(df.index), 1)
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(xtickslabel, rotation=45)
+        plt.legend()
+        plt.savefig("/home/murphy/django/static/images/stat.png")
+
+    def grouped_bar_modify(self, dataframe):
+        fig, ax = plt.subplots()
+        xticker, width = self.group_bar_ticker(len(dataframe.columns), len(dataframe.index))
+        width = 0.35
+        x = np.arange(len(dataframe.columns))
+        rect1 = ax.bar(xticker[0], df.iloc[0, :], width)
+        rect2 = ax.bar(xticker[1], df.iloc[1, :], width)
+        print(x)
+        print(xticker[0])
+        print(width)
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
     def stackplot(self, ax, x, y, para):
@@ -151,7 +166,24 @@ class Chandler:
         return tickers, width
 
     @staticmethod
-    def autolabel(rects):
+    def group_bar_ticker_modify(dataframe, x_axis='columns', gap=0.2):
+        if x_axis == "columns":
+            nticks, nbars = len(dataframe.columns), len(dataframe.index)
+        else:
+            nbars, nticks = len(dataframe.columns), len(dataframe.index)
+        width = (1 - gap) / nbars
+        tickers = []
+        x = np.arange(nbars)
+        for j in x:
+            tmp = []
+            for i in np.arange(nticks):
+                t = x[j] - width * nbars / 2 + width / 2 + i * width
+                tmp.append(t)
+            tickers.append(tmp)
+        return tickers, width
+
+    @staticmethod
+    def autolabel(ax, rects):
         """Attach a text label above each bar in *rects*, displaying its height."""
         for rect in rects:
             height = rect.get_height()
@@ -176,6 +208,11 @@ if __name__ == "__main__":
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
     monica = Chandler(file_list=files, period='quarter')
-    df = monica.date_analysis()
-    # monica.stack_plot(type='date', df=df, figure_type="plot")
-    monica.grouped_bar(type='date', dataframe=df)
+    # df = monica.cancer_type_analysis().round(2)
+    # # monica.stack_plot(type='date', df=df, figure_type="plot")
+    # monica.grouped_bar(type='cancer', dataframe=df)
+    labels = ['G1', 'G2', 'G3', 'G4', 'G5']
+    men_means = [20, 34, 30, 35, 27]
+    women_means = [25, 32, 34, 20, 25]
+    df = pd.DataFrame([men_means, women_means], index=['Male', 'Female'], columns=labels)
+    monica.grouped_bar_modify(df)
