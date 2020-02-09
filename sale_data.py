@@ -116,6 +116,12 @@ class Chandler:
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
     def grouped_bar(self, type, dataframe):
+        """
+        Discard
+        :param type:
+        :param dataframe:
+        :return:
+        """
         data_list = ['date', 'cancer', 'department']
         if type not in data_list:
             raise ValueError("Choose from %s" % ("/".join(data_list)))
@@ -135,15 +141,18 @@ class Chandler:
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
     def grouped_bar_modify(self, dataframe):
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(12, 8))
         xticker, width = self.group_bar_ticker(len(dataframe.columns), len(dataframe.index))
-        width = 0.35
-        x = np.arange(len(dataframe.columns))
-        rect1 = ax.bar(xticker[0], df.iloc[0, :], width)
-        rect2 = ax.bar(xticker[1], df.iloc[1, :], width)
-        print(x)
-        print(xticker[0])
-        print(width)
+        pos = list(range(len(df.index)))
+        for i in range(len(dataframe.columns)):
+            rect = ax.bar([(p + width*i - width*len(dataframe.columns)/2.0) for p in pos], df.iloc[:, i], width, alpha=0.5, label=dataframe.columns[i])
+            self.autolabel(ax, rect)
+
+        ax.set_xticks([p + 1.5 * width for p in pos])
+        ax.set_xticklabels(dataframe.index)
+
+        plt.xlim(min(pos) - width * len(dataframe.columns), max(pos) + width * len(dataframe.columns))
+        plt.legend()
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
     def stackplot(self, ax, x, y, para):
@@ -173,14 +182,7 @@ class Chandler:
             nbars, nticks = len(dataframe.columns), len(dataframe.index)
         width = (1 - gap) / nbars
         tickers = []
-        x = np.arange(nbars)
-        for j in x:
-            tmp = []
-            for i in np.arange(nticks):
-                t = x[j] - width * nbars / 2 + width / 2 + i * width
-                tmp.append(t)
-            tickers.append(tmp)
-        return tickers, width
+        return [p + width*i for p in pos]
 
     @staticmethod
     def autolabel(ax, rects):
@@ -208,11 +210,11 @@ if __name__ == "__main__":
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
     monica = Chandler(file_list=files, period='quarter')
-    # df = monica.cancer_type_analysis().round(2)
+    df = monica.cancer_type_analysis().round(2)
     # # monica.stack_plot(type='date', df=df, figure_type="plot")
-    # monica.grouped_bar(type='cancer', dataframe=df)
-    labels = ['G1', 'G2', 'G3', 'G4', 'G5']
-    men_means = [20, 34, 30, 35, 27]
-    women_means = [25, 32, 34, 20, 25]
-    df = pd.DataFrame([men_means, women_means], index=['Male', 'Female'], columns=labels)
-    monica.grouped_bar_modify(df)
+    monica.grouped_bar_modify(dataframe=df)
+    # labels = ['G1', 'G2', 'G3', 'G4', 'G5']
+    # men_means = [20, 34, 30, 35, 27]
+    # women_means = [25, 32, 34, 20, 25]
+    # df = pd.DataFrame([men_means, women_means], index=['Male', 'Female'], columns=labels)
+    # monica.grouped_bar_modify(df)
