@@ -115,7 +115,12 @@ class Chandler:
         plt.legend(loc='upper left')
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
-    def grouped_bar_modify(self, dataframe):
+    def grouped_bar(self, dataframe):
+        """
+        Ref: https://chrisalbon.com/python/data_visualization/matplotlib_grouped_bar_plot/
+        :param dataframe:
+        :return:
+        """
         fig, ax = plt.subplots(figsize=(12, 8))
         xticker, width = self.group_bar_ticker(len(dataframe.columns), len(dataframe.index))
         pos = list(range(len(df.index)))
