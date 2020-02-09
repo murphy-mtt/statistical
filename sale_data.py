@@ -142,11 +142,9 @@ class Chandler:
 
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
-    def stackplot(self, ax, x, y, para):
-        return ax.stackplot(x, y, **para)
-
-    def plot(self, ax, x, y, para):
-        return ax.plot(x, y, **para)
+    def stacked_bar(self, dataframe):
+        dataframe.plot.bar(stacked=True, rot=45)
+        plt.savefig("/home/murphy/django/static/images/stat.png")
 
     @staticmethod
     def group_bar_ticker(cols, rows, gap=0.2):
@@ -197,9 +195,9 @@ if __name__ == "__main__":
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
     monica = Chandler(file_list=files, period='quarter')
-    df = monica.cancer_type_analysis().round(2)
+    df = monica.date_analysis().round(2)
     # # monica.stack_plot(type='date', df=df, figure_type="plot")
-    monica.grouped_bar_modify(dataframe=df)
+    monica.stacked_bar(dataframe=df)
     # labels = ['G1', 'G2', 'G3', 'G4', 'G5']
     # men_means = [20, 34, 30, 35, 27]
     # women_means = [25, 32, 34, 20, 25]
