@@ -115,37 +115,18 @@ class Chandler:
         plt.legend(loc='upper left')
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
-    def grouped_bar(self, type, dataframe):
-        """
-        Discard
-        :param type:
-        :param dataframe:
-        :return:
-        """
-        data_list = ['date', 'cancer', 'department']
-        if type not in data_list:
-            raise ValueError("Choose from %s" % ("/".join(data_list)))
-        if type == "date":
-            xtickslabel = df.index.strftime(date_format='%Y-%m')
-        else:
-            xtickslabel = df.index
-        fig, ax = plt.subplots()
-        xticker, width = self.group_bar_ticker(len(dataframe.columns), len(dataframe.index))
-        for i in range(len(dataframe.index)):
-            rect = ax.bar(xticker[i], dataframe.iloc[i, :], width, label=dataframe.index[i])
-            self.autolabel(ax, rect)
-        xticks = range(0, len(df.index), 1)
-        ax.set_xticks(xticks)
-        ax.set_xticklabels(xtickslabel, rotation=45)
-        plt.legend()
-        plt.savefig("/home/murphy/django/static/images/stat.png")
-
     def grouped_bar_modify(self, dataframe):
         fig, ax = plt.subplots(figsize=(12, 8))
         xticker, width = self.group_bar_ticker(len(dataframe.columns), len(dataframe.index))
         pos = list(range(len(df.index)))
         for i in range(len(dataframe.columns)):
-            rect = ax.bar([(p + width*i - width*len(dataframe.columns)/2.0) for p in pos], df.iloc[:, i], width, alpha=0.5, label=dataframe.columns[i])
+            rect = ax.bar(
+                [(p + width*i - width*len(dataframe.columns)/2.0) for p in pos],
+                df.iloc[:, i],
+                width,
+                alpha=0.5,
+                label=dataframe.columns[i]
+            )
             self.autolabel(ax, rect)
 
         ax.set_xticks([p + 1.5 * width for p in pos])
@@ -153,6 +134,7 @@ class Chandler:
 
         plt.xlim(min(pos) - width * len(dataframe.columns), max(pos) + width * len(dataframe.columns))
         plt.legend()
+
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
     def stackplot(self, ax, x, y, para):
