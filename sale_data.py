@@ -197,7 +197,7 @@ if __name__ == "__main__":
     monica = Chandler(file_list=files, period='quarter')
     df = monica.date_analysis().round(2)
     # # monica.stack_plot(type='date', df=df, figure_type="plot")
-    monica.stacked_bar(dataframe=df)
+    monica.stacked_bar(dataframe=df.T)
     # labels = ['G1', 'G2', 'G3', 'G4', 'G5']
     # men_means = [20, 34, 30, 35, 27]
     # women_means = [25, 32, 34, 20, 25]
