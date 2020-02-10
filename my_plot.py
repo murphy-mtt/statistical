@@ -240,11 +240,11 @@ def setup_axes(fig, rect):
 
 
 if __name__ == "__main__":
-    fig = plt.figure(figsize=(3, 2.5))
-    fig.subplots_adjust(top=0.8)
-    ax1 = setup_axes(fig, "111")
-
-    ax1.axis["x"].set_axis_direction("left")
+    # fig = plt.figure(figsize=(3, 2.5))
+    # fig.subplots_adjust(top=0.8)
+    # ax1 = setup_axes(fig, "111")
+    #
+    # ax1.axis["x"].set_axis_direction("left")
     # mu, sigma = 100, 15
     # mu2, sigma2 = 130, 20
     # x = mu + sigma * np.random.randn(10000)
@@ -292,8 +292,23 @@ if __name__ == "__main__":
     # auto_label(rects1)
     # auto_label(rects2)
     # plt.legend()
+    np.random.seed(1985)
 
-    # fig, ax = plt.subplots(2, 1)
+    fig, ax = plt.subplots(2, 2)
+    data1 = np.random.random([6, 50])
+    data2 = np.random.gamma(4, size=[60, 50])
+    colors1 = ['C{}'.format(i) for i in range(6)]
+    colors2 = 'black'
+
+    lineoffsets1 = np.array([-15, -3, 1, 1.5, 6, 8])
+    lineoffsets2 = 1
+    linelengths1 = [5, 2, 1, 1, 3, 1.5]
+    linelengths2 = 1
+
+    ax[0][0].eventplot(data1, colors=colors1, lineoffsets=linelengths1, linelengths=linelengths1)
+    ax[1][0].eventplot(data1, colors=colors1, lineoffsets=linelengths1, linelengths=linelengths1, orientation='vertical')
+    ax[0][1].eventplot(data2, colors=colors2, lineoffsets=lineoffsets2, linelengths=linelengths2)
+    ax[1][1].eventplot(data2[0:5], colors=colors2, lineoffsets=lineoffsets2, linelengths=linelengths2)
     # t = np.arange(0.0, 1.0+0.01, 0.01)
     # s = np.cos(2 * 2*np.pi * t)
     # t[41:60] = np.nan
