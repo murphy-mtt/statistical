@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches  # needed for waffle Charts
 import mpl_toolkits.axisartist as axisartist
+import matplotlib.dates as mdates
+from datetime import datetime
 
 
 def my_plotter(ax, data1, data2, para):
@@ -239,7 +241,71 @@ def setup_axes(fig, rect):
     return ax
 
 
+def get_github_data():
+    try:
+        import urllib.request
+        import json
+        url = 'https://api.github.com/repos/matplotlib/matplotlib/releases'
+        url += '?per_page=100'
+        data = json.loads(urllib.request.urlopen(url).read().decode())
+        dates = []
+        names = []
+        for item in data:
+            if 'rc' not in item['tag_name'] and 'b' not in item['tag_name']:
+                dates.append(item['published_at'].split("T")[0])
+                names.append(item['tag_name'])
+        dates = [datetime.strptime(d, "%Y-%m-%d") for d in dates]
+    except Exception:
+        names = ['v2.2.4', 'v3.0.3', 'v3.0.2', 'v3.0.1', 'v3.0.0', 'v2.2.3',
+                 'v2.2.2', 'v2.2.1', 'v2.2.0', 'v2.1.2', 'v2.1.1', 'v2.1.0',
+                 'v2.0.2', 'v2.0.1', 'v2.0.0', 'v1.5.3', 'v1.5.2', 'v1.5.1',
+                 'v1.5.0', 'v1.4.3', 'v1.4.2', 'v1.4.1', 'v1.4.0']
+
+        dates = ['2019-02-26', '2019-02-26', '2018-11-10', '2018-11-10',
+                 '2018-09-18', '2018-08-10', '2018-03-17', '2018-03-16',
+                 '2018-03-06', '2018-01-18', '2017-12-10', '2017-10-07',
+                 '2017-05-10', '2017-05-02', '2017-01-17', '2016-09-09',
+                 '2016-07-03', '2016-01-10', '2015-10-29', '2015-02-16',
+                 '2014-10-26', '2014-10-18', '2014-08-26']
+        dates = [datetime.strptime(d, "%Y-%m-%d") for d in dates]
+
+    return names, dates
+
+
+def timeline(names, dates):
+    levels = np.tile([-5, 5, -3, 3, -1, 1], int(np.ceil(len(dates)/6)))[:len(dates)]
+    fix, ax = plt.subplots(figsize=(8.8, 4), constrained_layout=True)
+    ax.set(title='Example')
+    markerline, stemline, baseline = ax.stem(
+        dates,  # 当仅给出levels时timeline产生图示，但是间距相等
+        levels,
+        linefmt='C3-',
+        basefmt='k-',
+    )
+    plt.setp(markerline, mec='k', mfc='w', zorder=3)
+    markerline.set_ydata(np.zeros(len(dates)))  # 删掉默认的圈
+
+    vert = np.array(['top', 'bottom'])[(levels>0).astype(int)]
+    for d, l, r, va in zip(dates, levels, names, vert):
+        ax.annotate(r, xy=(d, l), va=va, ha='right', xytext=(-3, np.sign(l)*3), textcoords="offset points")
+
+    ax.get_xaxis().set_major_locator(mdates.MonthLocator(interval=4))
+    ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%b %Y"))
+    plt.setp(ax.get_xticklabels(), rotation=30, ha='right')
+
+    ax.get_yaxis().set_visible(False)
+
+    for spine in ['left', 'top', 'right']:
+        ax.spines[spine].set_visible(False)
+
+    ax.margins(y=0.1)
+
+    plt.savefig("/home/murphy/django/static/images/stat.png")
+
+
 if __name__ == "__main__":
+    d = get_github_data()
+    timeline(d[0], d[1])
     # fig = plt.figure(figsize=(3, 2.5))
     # fig.subplots_adjust(top=0.8)
     # ax1 = setup_axes(fig, "111")
@@ -292,23 +358,25 @@ if __name__ == "__main__":
     # auto_label(rects1)
     # auto_label(rects2)
     # plt.legend()
-    np.random.seed(1985)
-
-    fig, ax = plt.subplots(2, 2)
-    data1 = np.random.random([6, 50])
-    data2 = np.random.gamma(4, size=[60, 50])
-    colors1 = ['C{}'.format(i) for i in range(6)]
-    colors2 = 'black'
-
-    lineoffsets1 = np.array([-15, -3, 1, 1.5, 6, 8])
-    lineoffsets2 = 1
-    linelengths1 = [5, 2, 1, 1, 3, 1.5]
-    linelengths2 = 1
-
-    ax[0][0].eventplot(data1, colors=colors1, lineoffsets=linelengths1, linelengths=linelengths1)
-    ax[1][0].eventplot(data1, colors=colors1, lineoffsets=linelengths1, linelengths=linelengths1, orientation='vertical')
-    ax[0][1].eventplot(data2, colors=colors2, lineoffsets=lineoffsets2, linelengths=linelengths2)
-    ax[1][1].eventplot(data2[0:5], colors=colors2, lineoffsets=lineoffsets2, linelengths=linelengths2)
+    # np.random.seed(1985)
+    #
+    # fig, ax = plt.subplots(2, 2)
+    # data1 = np.random.random([6, 50])
+    # data2 = np.random.gamma(1, size=[60, 50])
+    # colors1 = ['C{}'.format(i) for i in range(6)]
+    # colors2 = 'black'
+    #
+    # lineoffsets1 = np.array([-15, -3, 1, 1.5, 6, 8])
+    # lineoffsets2 = 1
+    # linelengths1 = [5, 2, 1, 1, 3, 1.5]
+    # linelengths2 = 1
+    #
+    # ax[0][0].eventplot(data1, colors=colors1, lineoffsets=linelengths1, linelengths=linelengths1)
+    # ax[1][0].eventplot(
+    #     data1, colors=colors1, lineoffsets=linelengths1, linelengths=linelengths1, orientation='vertical'
+    # )
+    # ax[0][1].eventplot(data2, colors=colors2, lineoffsets=lineoffsets2, linelengths=linelengths2)
+    # ax[1][1].eventplot(data2[0:10], colors=colors2, lineoffsets=lineoffsets2, linelengths=linelengths2)
     # t = np.arange(0.0, 1.0+0.01, 0.01)
     # s = np.cos(2 * 2*np.pi * t)
     # t[41:60] = np.nan
@@ -350,4 +418,4 @@ if __name__ == "__main__":
     #         my_scatter(ax[j], df.loc[:, x[j]], df.loc[:, y[0]], {})
     # else:
     #     pass
-    plt.savefig("/home/murphy/django/static/images/stat.png")
+    # plt.savefig("/home/murphy/django/static/images/stat.png")
