@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import ConnectionPatch
 
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
@@ -155,8 +156,63 @@ class Chandler:
         plt.title("Pie of Sales")
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
-    def bar_of_pie(self, data):
-        pass
+    def bar_of_pie(self, ratios1, label1, ratios2, label2):
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        fig.subplots_adjust(wspace=0)
+
+        # pie chart parameters
+        explode = np.zeros(len(ratios1))
+        explode[0] = 0.1
+        # rotate so that first wedge is split by the x-axis
+        angle = -180 * ratios1[0]
+        ax1.pie(ratios1, autopct='%1.1f%%', startangle=angle,
+                labels=label1, explode=explode)
+
+        # bar chart parameters
+
+        xpos = 0
+        bottom = 0
+        width = .2
+        # colors = [[.1, .3, .5], [.1, .3, .3], [.1, .3, .7], [.1, .3, .9]]
+
+        for j in range(len(ratios2)):
+            height = ratios2[j]
+            ax2.bar(xpos, height, width, bottom=bottom)
+            ypos = bottom + ax2.patches[j].get_height() / 2
+            bottom += height
+            ax2.text(xpos, ypos, "%d%%" % (ax2.patches[j].get_height() * 100),
+                     ha='center')
+
+        ax2.set_title('Age of approvers')
+        ax2.legend(label2)
+        ax2.axis('off')
+        ax2.set_xlim(- 2.5 * width, 2.5 * width)
+
+        # use ConnectionPatch to draw lines between the two plots
+        # get the wedge data
+        theta1, theta2 = ax1.patches[0].theta1, ax1.patches[0].theta2
+        center, r = ax1.patches[0].center, ax1.patches[0].r
+        bar_height = sum([item.get_height() for item in ax2.patches])
+
+        # draw top connecting line
+        x = r * np.cos(np.pi / 180 * theta2) + center[0]
+        y = np.sin(np.pi / 180 * theta2) + center[1]
+        con = ConnectionPatch(xyA=(- width / 2, bar_height), xyB=(x, y),
+                              coordsA="data", coordsB="data", axesA=ax2, axesB=ax1)
+        con.set_color([0, 0, 0])
+        con.set_linewidth(4)
+        ax2.add_artist(con)
+
+        # draw bottom connecting line
+        x = r * np.cos(np.pi / 180 * theta1) + center[0]
+        y = np.sin(np.pi / 180 * theta1) + center[1]
+        con = ConnectionPatch(xyA=(- width / 2, 0), xyB=(x, y), coordsA="data",
+                              coordsB="data", axesA=ax2, axesB=ax1)
+        con.set_color([0, 0, 0])
+        ax2.add_artist(con)
+        con.set_linewidth(4)
+
+        plt.savefig("/home/murphy/django/static/images/stat.png")
 
     @staticmethod
     def group_bar_ticker(cols, rows, gap=0.2):
@@ -211,11 +267,16 @@ if __name__ == "__main__":
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
     monica = Chandler(file_list=files, period='quarter')
-    df_total = monica.integration()
-    df = monica.date_analysis().round(2)
-    t = df_total.groupby('地区').sum()
+    ratios1 = [.27, .56, .17]
+    labels1 = ['Approve', 'Disapprove', 'Undecided']
+    ratios2 = [.33, .54, .07, .06]
+    labels2 = ['50-65', 'Over 65', '35-49', 'Under 35']
+    monica.bar_of_pie(ratios1, labels1, ratios2, labels2)
+    # df_total = monica.integration()
+    # df = monica.date_analysis().round(2)
+    # t = df_total.groupby('地区').sum()
     # # monica.stack_plot(type='date', df=df, figure_type="plot")
-    monica.pie_chart(data=t)
+    # monica.pie_chart(data=t)
     # labels = ['G1', 'G2', 'G3', 'G4', 'G5']
     # men_means = [20, 34, 30, 35, 27]
     # women_means = [25, 32, 34, 20, 25]
