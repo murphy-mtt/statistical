@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 plt.rcParams['font.sans-serif'] = ['SimHei']
+plt.rcParams['axes.unicode_minus'] = False
 
 
 class Chandler:
@@ -146,6 +147,17 @@ class Chandler:
         dataframe.plot.bar(stacked=True, rot=45)
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
+    def pie_chart(self, data, label=None):
+        fig, ax = plt.subplots()
+        ax.pie(data, autopct='%1.1f%%', startangle=90, labels=data.index)
+        ax.axis('equal')
+        plt.legend()
+        plt.title("Pie of Sales")
+        plt.savefig("/home/murphy/django/static/images/stat.png")
+
+    def bar_of_pie(self, data):
+        pass
+
     @staticmethod
     def group_bar_ticker(cols, rows, gap=0.2):
         width = (1 - gap)/cols
@@ -180,6 +192,10 @@ class Chandler:
                         textcoords="offset points",
                         ha='center', va='bottom')
 
+    @staticmethod
+    def percent_convert(ser):
+        return ser / float(ser.sum())
+
 
 class Picasso:
     def __init__(self, nrows=1, ncols=1, data=None):
@@ -195,9 +211,11 @@ if __name__ == "__main__":
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
     monica = Chandler(file_list=files, period='quarter')
+    df_total = monica.integration()
     df = monica.date_analysis().round(2)
+    t = df_total.groupby('地区').sum()
     # # monica.stack_plot(type='date', df=df, figure_type="plot")
-    monica.stacked_bar(dataframe=df.T)
+    monica.pie_chart(data=t)
     # labels = ['G1', 'G2', 'G3', 'G4', 'G5']
     # men_means = [20, 34, 30, 35, 27]
     # women_means = [25, 32, 34, 20, 25]
