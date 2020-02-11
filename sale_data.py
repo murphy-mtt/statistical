@@ -156,6 +156,21 @@ class Chandler:
         plt.title("Pie of Sales")
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
+    def region_distribution(self, region=None):
+        df = self.integration()
+        df_bp = pd.pivot_table(df, index=['地区', '销售姓名'], aggfunc=np.sum).fillna(0)
+        counts1 = []
+        lables1 = df_bp.index.levels[0].values.tolist()
+        region_index = lables1.index(region)
+        item = lables1.pop(region_index)
+        lables1.insert(0, item)
+        for i in lables1:
+            counts1.append(df_bp.loc[i].sum()[0])
+        counts1 = self.percent_convert(np.array(counts1))
+        count2 = self.percent_convert(df_bp.loc[region].values)
+        labels2 = df_bp.loc[region].index.tolist()
+        self.bar_of_pie(counts1, lables1, count2, labels2)
+
     def bar_of_pie(self, ratios1, label1, ratios2, label2):
         fig, (ax1, ax2) = plt.subplots(1, 2)
         fig.subplots_adjust(wspace=0)
@@ -183,7 +198,7 @@ class Chandler:
             ax2.text(xpos, ypos, "%d%%" % (ax2.patches[j].get_height() * 100),
                      ha='center')
 
-        ax2.set_title('Age of approvers')
+        ax2.set_title('{}销量分布'.format("/".join(self.region)))
         ax2.legend(label2)
         ax2.axis('off')
         ax2.set_xlim(- 2.5 * width, 2.5 * width)
@@ -200,7 +215,7 @@ class Chandler:
         con = ConnectionPatch(xyA=(- width / 2, bar_height), xyB=(x, y),
                               coordsA="data", coordsB="data", axesA=ax2, axesB=ax1)
         con.set_color([0, 0, 0])
-        con.set_linewidth(4)
+        con.set_linewidth(1)
         ax2.add_artist(con)
 
         # draw bottom connecting line
@@ -210,7 +225,7 @@ class Chandler:
                               coordsB="data", axesA=ax2, axesB=ax1)
         con.set_color([0, 0, 0])
         ax2.add_artist(con)
-        con.set_linewidth(4)
+        con.set_linewidth(1)
 
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
@@ -267,16 +282,12 @@ if __name__ == "__main__":
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
     monica = Chandler(file_list=files, period='quarter')
-    ratios1 = [.27, .56, .17]
-    labels1 = ['Approve', 'Disapprove', 'Undecided']
-    ratios2 = [.33, .54, .07, .06]
-    labels2 = ['50-65', 'Over 65', '35-49', 'Under 35']
-    monica.bar_of_pie(ratios1, labels1, ratios2, labels2)
-    # df_total = monica.integration()
-    # df = monica.date_analysis().round(2)
-    # t = df_total.groupby('地区').sum()
-    # # monica.stack_plot(type='date', df=df, figure_type="plot")
-    # monica.pie_chart(data=t)
+    # monica.region_distribution(region='江浙沪皖I')
+    df_total = monica.integration()
+    df = monica.date_analysis().round(2)
+    t = df_total.groupby('地区').sum()
+    # monica.stack_plot(type='date', df=df)
+    monica.pie_chart(data=t)
     # labels = ['G1', 'G2', 'G3', 'G4', 'G5']
     # men_means = [20, 34, 30, 35, 27]
     # women_means = [25, 32, 34, 20, 25]
