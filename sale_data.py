@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import ConnectionPatch
 
-plt.rcParams['font.sans-serif'] = ['SimHei']
+plt.rcParams['font.sans-serif'] = ['SimSun']
 plt.rcParams['axes.unicode_minus'] = False
 
 
@@ -198,7 +198,7 @@ class Chandler:
             ax2.text(xpos, ypos, "%d%%" % (ax2.patches[j].get_height() * 100),
                      ha='center')
 
-        ax2.set_title('{}销量分布'.format("/".join(self.region)))
+
         ax2.legend(label2)
         ax2.axis('off')
         ax2.set_xlim(- 2.5 * width, 2.5 * width)
@@ -227,7 +227,37 @@ class Chandler:
         ax2.add_artist(con)
         con.set_linewidth(1)
 
+        plt.title('{}销量分布'.format("/".join(self.region)))
+
         plt.savefig("/home/murphy/django/static/images/stat.png")
+
+    def individual_sale_data(self):
+        """
+        区域销售销量分布
+        :return:
+        """
+        df = self.integration()
+        dfs = pd.pivot_table(df, index=['销售姓名'], aggfunc=([np.sum, np.mean]))
+        dfs['order'] = np.arange(len(dfs.index))
+        r = (dfs.loc[:, 'sum'] / 1000) / 2 * np.pi
+        x_loc = r.iloc[:, 0] + np.arange(len(dfs))
+        dfs['r'] = r
+        fig, ax = plt.subplots()
+        ax.scatter(dfs.index, dfs.loc[:, 'mean'], s=dfs.loc[:, 'sum'] / 1000, alpha=0.5)
+        ax.annotate('te', xy=(x_loc[2], dfs.iloc[2, 1]))
+        for i in range(len(dfs)):
+            ax.annotate(
+                dfs.iloc[i, 0],
+                xy=(dfs.iloc[i, 2], dfs.iloc[i, 1])
+            )
+        plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
+        plt.xlabel("销售人员")
+        plt.ylabel("销量均值")
+        plt.title('{}销售销量分布'.format("/".join(self.region)))
+        plt.savefig("/home/murphy/django/static/images/stat.png")
+
+    def bubble(self, dataframe):
+        pass
 
     @staticmethod
     def group_bar_ticker(cols, rows, gap=0.2):
@@ -282,12 +312,13 @@ if __name__ == "__main__":
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
     monica = Chandler(file_list=files, period='quarter')
-    # monica.region_distribution(region='江浙沪皖I')
+    # monica.individual_sale_data()
+    monica.region_distribution(region='江浙沪皖I')
     df_total = monica.integration()
     df = monica.date_analysis().round(2)
     t = df_total.groupby('地区').sum()
     # monica.stack_plot(type='date', df=df)
-    monica.pie_chart(data=t)
+    # monica.pie_chart(data=t)
     # labels = ['G1', 'G2', 'G3', 'G4', 'G5']
     # men_means = [20, 34, 30, 35, 27]
     # women_means = [25, 32, 34, 20, 25]
