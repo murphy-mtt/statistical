@@ -242,17 +242,18 @@ class Chandler:
         r = (dfs.loc[:, 'sum'] / 1000) / 2 * np.pi
         x_loc = r.iloc[:, 0] + np.arange(len(dfs))
         dfs['r'] = r
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(12, 9))
         ax.scatter(dfs.index, dfs.loc[:, 'mean'], s=dfs.loc[:, 'sum'] / 1000, alpha=0.5)
         ax.annotate('te', xy=(x_loc[2], dfs.iloc[2, 1]))
         for i in range(len(dfs)):
             ax.annotate(
                 dfs.iloc[i, 0],
-                xy=(dfs.iloc[i, 2], dfs.iloc[i, 1])
+                xy=(dfs.iloc[i, 2], dfs.iloc[i, 1]),
             )
         plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
         plt.xlabel("销售人员")
         plt.ylabel("销量均值")
+        plt.grid(True)
         plt.title('{}销售销量分布'.format("/".join(self.region)))
         plt.savefig("/home/murphy/django/static/images/stat.png")
 
@@ -312,11 +313,11 @@ if __name__ == "__main__":
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
     monica = Chandler(file_list=files, period='quarter')
-    # monica.individual_sale_data()
-    monica.region_distribution(region='江浙沪皖I')
-    df_total = monica.integration()
-    df = monica.date_analysis().round(2)
-    t = df_total.groupby('地区').sum()
+    monica.individual_sale_data()
+    # monica.region_distribution(region='江浙沪皖I')
+    # df_total = monica.integration()
+    # df = monica.date_analysis().round(2)
+    # t = df_total.groupby('地区').sum()
     # monica.stack_plot(type='date', df=df)
     # monica.pie_chart(data=t)
     # labels = ['G1', 'G2', 'G3', 'G4', 'G5']
