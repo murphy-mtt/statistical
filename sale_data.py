@@ -5,19 +5,15 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import ConnectionPatch
 from matplotlib.ticker import MaxNLocator
 from collections import namedtuple
+import scipy.stats as stats
+
 
 plt.rcParams['font.sans-serif'] = ['SimSun']
 plt.rcParams['axes.unicode_minus'] = False
 
-np.random.seed(42)
 
 Student = namedtuple('Student', ['name', 'grade', 'gender'])
 Score = namedtuple('Score', ['score', 'percentile'])
-
-# GLOBAL CONSTANTS
-testNames = ['Pacer Test', 'Flexed Arm\n Hang', 'Mile Run', 'Agility',
-             'Push Ups']
-testMeta = dict(zip(testNames, ['laps', 'sec', 'min:sec', 'sec', '']))
 
 
 class Chandler:
@@ -272,7 +268,46 @@ class Chandler:
     def bubble(self, dataframe):
         pass
 
+    def get_product_list(self):
+        df_ps = pd.pivot_table(self.integration(), index=['产品名称'], columns=['销售姓名'], aggfunc=sum).fillna(0)
+        product_name = df_ps.index.values.tolist()
+        testMeta = []
+        for i in range(len(product_name)):
+            testMeta.append("")
+        return product_name, testMeta
+
+    def sale_ranking(self, s):
+        df = self.integration()
+        df_ps = pd.pivot_table(df, index=['产品名称'], columns=['销售姓名'], aggfunc=sum).fillna(0)
+        result = {}
+
+        for sale in df_ps.columns:
+            result[sale[1]] = {}
+            scoreList = []
+            percList = []
+            result[sale[1]]['s'] = []
+            result[sale[1]]['p'] = []
+            for product in df_ps.index:
+                product_total_sale = df_ps.loc[product, :].values.tolist()
+                product_individual_sale = df_ps.loc[product, sale]
+                percentile = stats.percentileofscore(product_total_sale, product_individual_sale)
+                scoreList.append(product_individual_sale)
+                percList.append(percentile)
+                result[sale[1]]['s'] = scoreList
+                result[sale[1]]['p'] = percList
+
+        testNames, testMeta = self.get_product_list()
+        student = Student(s, 2, 'boy')
+        cohort_size = len(df_ps.columns.levels[1])
+        scores = dict(zip(testNames, (Score(v, p) for v, p in zip(result[s]['s'], result[s]['p']))))
+        arts = self.plot_student_results(student, scores, cohort_size)
+        plt.savefig("/home/murphy/django/static/images/stat.png")
+
     def plot_student_results(self, student, scores, cohort_size):
+        testNames, testMeta = self.get_product_list()
+        for i in range(len(testNames)):
+            testMeta.append("")
+
         #  create the figure
         fig, ax1 = plt.subplots(figsize=(14, 7))
         fig.subplots_adjust(left=0.115, right=0.88)
@@ -351,12 +386,14 @@ class Chandler:
         # make the interactive mouse over give the bar title
         ax2.fmt_ydata = self.format_ycursor
         # return all of the artists created
+
+        # return {'fig': fig,
+        #         'ax': ax1,
+        #         'ax_right': ax2,
+        #         'bars': rects,
+        #         'perc_labels': rect_labels}
+        print("test")
         plt.savefig("/home/murphy/django/static/images/stat.png")
-        return {'fig': fig,
-                'ax': ax1,
-                'ax_right': ax2,
-                'bars': rects,
-                'perc_labels': rect_labels}
 
     @staticmethod
     def group_bar_ticker(cols, rows, gap=0.2):
@@ -413,8 +450,7 @@ class Chandler:
             return v + 'th'
         return v + suffixes[v[-1]]
 
-    @staticmethod
-    def format_score(scr, test):
+    def format_score(self, scr, test):
         """
         Build up the score labels for the right Y-axis by first
         appending a carriage return to each string and then tacking on
@@ -423,7 +459,9 @@ class Chandler:
         info (like for pushups) then don't add the carriage return to
         the string
         """
-        md = testMeta[test]
+        testNames, testMeta = self.get_product_list()
+        # md = testMeta[test]
+        md = ""
         if md:
             return '{0}\n{1}'.format(scr, md)
         else:
@@ -452,17 +490,7 @@ if __name__ == "__main__":
     for r, d, f in os.walk(d):
         files = [os.path.join(r, x) for x in f]
     monica = Chandler(file_list=files, period='quarter')
-
-    student = Student('Johnny Doe', 2, 'boy')
-    scores = dict(zip(testNames,
-                      (Score(v, p) for v, p in
-                       zip(['7', '48', '12:52', '17', '14'],
-                           np.round(np.random.uniform(0, 1,
-                                                      len(testNames)) * 100, 0)))))
-    cohort_size = 62  # The number of other 2nd grade boys
-
-    arts = monica.plot_student_results(student, scores, cohort_size)
-
+    monica.sale_ranking(s='施燕琳')
 
     # monica.region_distribution(region='江浙沪皖I')
     # df_total = monica.integration()
